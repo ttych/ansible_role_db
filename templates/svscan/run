@@ -1,0 +1,47 @@
+#!/bin/sh
+
+export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+
+POSTGRESQL_USER="${POSTGRESQL_USER:-{{ db_postgresql_user }}}"
+POSTGRESQL_DB_DIR="${POSTGRESQL_DB_DIR:-{{ db_postgresql_db_dir }}}"
+
+which_db_data()
+{
+    if ! [ -r "$POSTGRESQL_DB_DIR/which_db_data" ]; then
+        echo default > "$POSTGRESQL_DB_DIR/which_db_data"
+    fi
+
+    which_db_data=$(cat "$POSTGRESQL_DB_DIR/which_db_data")
+    which_db_data="${which_db_data:-default}"
+    POSTGRESQL_DB_DATA="$POSTGRESQL_DB_DIR/$which_db_data"
+}
+
+
+# POSTGRESQL_CTL_FLAGS="${POSTGRESQL_CTL_FLAGS:-{{ db_postgresql_ctl_flags }}}"
+# postgresql_run()
+# {
+#     exec setuidgid "$POSTGRESQL_USER" pg_ctl -D "$POSTGRESQL_DB_DATA" $POSTGRESQL_FLAGS
+# }
+
+POSTGRESQL_LISTEN="${POSTGRESQL_LISTEN:-{{ db_postgresql_listen }}}"
+POSTGRESQL_PORT="${POSTGRESQL_PORT:-{{ db_postgresql_port }}}"
+postgresql_run()
+{
+    exec setuidgid "$POSTGRESQL_USER" postgres -D "$POSTGRESQL_DB_DATA" -h "$POSTGRESQL_LISTEN" -p "$POSTGRESQL_PORT"
+}
+
+
+POSTGRESQL_INITDB_FLAGS="${POSTGRESQL_INITDB_FLAGS:-{{ db_postgresql_initdb_flags }}}"
+postgresql_initdb()
+{
+    setuidgid "$POSTGRESQL_USER" initdb -D "$POSTGRESQL_DB_DATA" $POSTGRESQL_INITDB_FLAGS
+}
+
+
+which_db_data
+
+if [ ! -d "$POSTGRESQL_DB_DATA" ]; then
+    postgresql_initdb
+fi
+
+postgresql_run

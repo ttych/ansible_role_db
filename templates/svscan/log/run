@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec setuidgid {{ db_postgresql_user }} multilog t ./main

@@ -1,0 +1,62 @@
+---
+
+- name: install postgresql packages
+  include: install.yml packages="{{ db_postgresql_packages }}" services="{{ db_postgresql_services }}" sysrcs="{{ db_postgresql_services_sysrcs }}"
+
+- name: setup daemontools for postgresql
+  block:
+    - name: set service directory tree
+      file:
+        path: "{{ item.path }}"
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+        state: directory
+      loop: "{{ db_postgresql_directories }}"
+
+    - template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: "{{ root_group }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - { src: svscan/run, dest: "{{ db_postgresql_svscan_dir }}/run", mode: "0750" }
+        - { src: svscan/log/run, dest: "{{ db_postgresql_svscan_log_dir }}/run", mode: "0750" }
+
+    - name: link svscan
+      file:
+        src: "{{ db_postgresql_svscan_dir }}"
+        dest: "{{ daemontools_svscan_dir }}/postgresql"
+        state: link
+
+  when: has_daemontools
+
+
+- name: start standard service
+  block:
+    - name: enable standard FreeBSD service
+      include: sysrc.yml key="{{ item }}_enable" value="YES"
+      loop: "{{ db_postgresql_services_sysrcs }}"
+      when: ansible_system == 'FreeBSD'
+
+    - name: enable standard Linux service
+      service:
+        name: "{{ item }}"
+        enabled: true
+      loop: "{{ db_postgresql_services }}"
+      when: ansible_system == 'Linux'
+
+    - service:
+        name: "{{ item }}"
+        state: started
+      loop: "{{ db_postgresql_services }}"
+      register: t_db_postgresql_service
+
+    - service:
+        name: "{{ item }}"
+        state: restarted
+      loop: "{{ db_postgresql_services }}"
+      when: t_db_postgresql_conf.changed and not t_db_postgresql_service.changed
+
+  when: has_daemontools is not defined or not has_daemontools

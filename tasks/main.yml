@@ -1,2 +1,12 @@
 ---
-# tasks file for ansible_role_db
+- block:
+    - include_tasks: context.yml
+
+    - include_tasks: setup_postgresql.yml
+      when: "'postgresql' in db_type"
+
+  when: want_db
+
+- name: set has_db
+  set_fact:
+    has_db: "{{ want_db }}"

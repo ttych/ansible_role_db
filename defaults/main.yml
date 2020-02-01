@@ -1,2 +1,15 @@
 ---
-# defaults file for ansible_role_db
+want_db: false
+db_type:
+  - postgresql
+
+db_postgresql_packages:
+  - postgresql
+db_postgresql_services:
+  - postgresql
+db_postgresql_services_sysrcs: "{{ db_postgresql_services }}"
+db_postgresql_user: postgres
+db_postgresql_ctl_flags: "-w -s -m fast"
+db_postgresql_initdb_flags: "--encoding=utf-8 --lc-collate=C"
+db_postgresql_listen: 127.0.0.1
+db_postgresql_port: 5432
