@@ -2,3 +2,4 @@
 db_postgresql_packages:
   - postgresql11-server
   - postgresql11-client
+  - postgresql11-contrib

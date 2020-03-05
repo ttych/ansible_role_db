@@ -1,1 +1,6 @@
 ---
+
+db_postgresql_packages:
+  - postgresql
+  - postgresql-client
+  - postgresql-contrib
