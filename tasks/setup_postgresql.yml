@@ -1,7 +1,10 @@
 ---
-
 - name: install postgresql packages
-  include: install.yml packages="{{ db_postgresql_packages }}" services="{{ db_postgresql_services }}" sysrcs="{{ db_postgresql_services_sysrcs }}"
+  include: install.yml
+  vars:
+    packages: "{{ db_postgresql_packages }}"
+    services: "{{ db_postgresql_services }}"
+    sysrcs: "{{ db_postgresql_services_sysrcs }}"
 
 - name: setup daemontools for postgresql
   block:
