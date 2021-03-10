@@ -1,6 +1,15 @@
 #!/bin/sh
 
-export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+for postgres_dir in /usr/lib/postgresql/*/bin/ ; do
+    [ -d "$postgres_dir" ] || continue
+    PATH="$postgres_dir:$PATH"
+done
+for postgres_dir in /usr/local/lib/postgresql/*/bin/ ; do
+    [ -d "$postgres_dir" ] || continue
+    PATH="$postgres_dir:$PATH"
+done
+export PATH
 
 POSTGRESQL_USER="${POSTGRESQL_USER:-{{ db_postgresql_user }}}"
 POSTGRESQL_DB_DIR="${POSTGRESQL_DB_DIR:-{{ db_postgresql_db_dir }}}"
