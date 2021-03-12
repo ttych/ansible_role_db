@@ -1,11 +1,7 @@
 #!/bin/sh
 
 PATH="/usr/local/bin:/usr/local/sbin:$PATH"
-for postgres_dir in /usr/lib/postgresql/*/bin/ ; do
-    [ -d "$postgres_dir" ] || continue
-    PATH="$postgres_dir:$PATH"
-done
-for postgres_dir in /usr/local/lib/postgresql/*/bin/ ; do
+for postgres_dir in /usr/local/lib/postgresql/*/bin/ /usr/lib/postgresql/*/bin/ ; do
     [ -d "$postgres_dir" ] || continue
     PATH="$postgres_dir:$PATH"
 done
@@ -43,7 +39,9 @@ postgresql_run()
 POSTGRESQL_INITDB_FLAGS="${POSTGRESQL_INITDB_FLAGS:-{{ db_postgresql_initdb_flags }}}"
 postgresql_initdb()
 {
-    setuidgid "$POSTGRESQL_USER" initdb -D "$POSTGRESQL_DB_DATA" $POSTGRESQL_INITDB_FLAGS
+    setuidgid "$POSTGRESQL_USER" initdb \
+              --auth-host={{ db_postgresql_auth_host }} --auth-local={{ db_postgresql_auth_local }} \
+              -D "$POSTGRESQL_DB_DATA" $POSTGRESQL_INITDB_FLAGS
 }
 
 

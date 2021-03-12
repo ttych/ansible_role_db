@@ -13,3 +13,5 @@ db_postgresql_ctl_flags: "-w -s -m fast"
 db_postgresql_initdb_flags: "--encoding=utf-8 --lc-collate=C"
 db_postgresql_listen: 127.0.0.1
 db_postgresql_port: 5432
+db_postgresql_auth_host: scram-sha-256
+db_postgresql_auth_local: peer
