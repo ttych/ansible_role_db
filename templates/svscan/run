@@ -30,9 +30,14 @@ which_db_data()
 
 POSTGRESQL_LISTEN="${POSTGRESQL_LISTEN:-{{ db_postgresql_listen }}}"
 POSTGRESQL_PORT="${POSTGRESQL_PORT:-{{ db_postgresql_port }}}"
+POSTGRESQL_SOCKET="${POSTGRESQL_SOCKET:-{{ db_postgresql_socket }}}"
 postgresql_run()
 {
-    exec setuidgid "$POSTGRESQL_USER" postgres -D "$POSTGRESQL_DB_DATA" -h "$POSTGRESQL_LISTEN" -p "$POSTGRESQL_PORT"
+    exec setuidgid "$POSTGRESQL_USER" postgres \
+         -D "$POSTGRESQL_DB_DATA" \
+         -h "$POSTGRESQL_LISTEN" \
+         -p "$POSTGRESQL_PORT" \
+         -k "$POSTGRESQL_SOCKET"
 }
 
 

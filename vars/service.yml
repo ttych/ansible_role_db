@@ -1,0 +1,8 @@
+---
+
+db_postgresql_service_dir: "{{ service_dir }}/postgresql"
+db_postgresql_dir: "{{ db_postgresql_service_dir }}"
+db_postgresql_db_dir: "{{ db_postgresql_service_dir }}/db"
+db_postgresql_dump_dir: "{{ db_postgresql_service_dir }}/dump"
+db_postgresql_run_dir: "{{ db_postgresql_service_dir }}/run"
+db_postgresql_socket: "{{ db_postgresql_run_dir }}"

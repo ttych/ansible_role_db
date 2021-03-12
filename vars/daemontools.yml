@@ -1,16 +1,13 @@
 ---
 
-db_postgresql_service_dir: "{{ service_dir }}/postgresql"
-db_postgresql_db_dir: "{{ db_postgresql_service_dir }}/db"
-db_postgresql_dump_dir: "{{ db_postgresql_service_dir }}/dump"
 db_postgresql_svscan_dir: "{{ db_postgresql_service_dir }}/svscan"
 db_postgresql_svscan_log_dir: "{{ db_postgresql_svscan_dir }}/log"
-db_postgresql_dir: "{{ db_postgresql_service_dir }}"
 
 db_postgresql_directories:
   - { path: "{{ db_postgresql_service_dir }}", owner: root, group: "{{ root_group }}", mode: "0755" }
   - { path: "{{ db_postgresql_db_dir }}", owner: "{{ db_postgresql_user }}", group: "{{ root_group }}", mode: "0750" }
   - { path: "{{ db_postgresql_dump_dir }}", owner: "{{ db_postgresql_user }}", group: "{{ root_group }}", mode: "0750" }
+  - { path: "{{ db_postgresql_run_dir }}", owner: "{{ db_postgresql_user }}", group: "{{ root_group }}", mode: "0755" }
   - { path: "{{ db_postgresql_svscan_dir }}", owner: root, group: "{{ root_group }}", mode: "0755" }
   - { path: "{{ db_postgresql_svscan_log_dir }}", owner: root, group: "{{ root_group }}", mode: "0755" }
   - { path: "{{ db_postgresql_svscan_log_dir }}/main", owner: "{{ db_postgresql_user }}", group: "{{ root_group }}", mode: "0755" }
