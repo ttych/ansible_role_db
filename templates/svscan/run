@@ -49,11 +49,73 @@ postgresql_initdb()
               -D "$POSTGRESQL_DB_DATA" $POSTGRESQL_INITDB_FLAGS
 }
 
+pg_version()
+{
+    pg_version=$(postgres --version | awk '{print $3}')
+    pg_version="${pg_version%.*}"
+}
+
+db_version()
+{
+    db_version=$(cat "$POSTGRESQL_DB_DATA/PG_VERSION")
+}
+
+compare_version()
+{
+    pg_version
+    db_version
+
+    if [ "$pg_version" != "$db_version" ]; then
+        echo >&2 "pg_version ($pg_version) does not match db_version ($db_version)"
+        return 1
+    fi
+}
+
+upgrade_db()
+{
+    POSTGRESQL_DB_DATA_PREVIOUS="$POSTGRESQL_DB_DATA.$(date "+%Y%m%d%H%M%S")"
+    setuidgid "$POSTGRESQL_USER" mv -i "$POSTGRESQL_DB_DATA" "$POSTGRESQL_DB_DATA_PREVIOUS" || return
+
+    pg_dist="/usr/local/lib/postgresql/$2"
+    [ ! -d "$pg_dist" ] && pg_dist="/usr/lib/postgresql/$2"
+    [ ! -d "$pg_dist" ] && echo >&2 "upgrade: no pg dist for version $2" && return 1
+
+    db_dist="/usr/local/lib/postgresql/$1"
+    [ ! -d "$db_dist" ] && db_dist="/usr/lib/postgresql/$1"
+    [ ! -d "$db_dist" ] && echo >&2 "upgrade: no db dist for version $1" && return 1
+
+
+    setuidgid "$POSTGRESQL_USER" $pg_dist/bin/pg_upgrade \
+        --old-datadir="$POSTGRESQL_DB_DATA_PREVIOUS" \
+        --new-datadir="$POSTGRESQL_DB_DATA" \
+        --old-bindir="$db_dist/bin" \
+        --new-bindir="$pg_dist/bin" \
+        --old-options '-c config_file=$POSTGRESQL_DB_DATA_PREVIOUS/postgresql.conf' \
+        --new-options '-c config_file=$POSTGRESQL_DB_DATA/postgresql.conf' \
+        --check || {
+        echo >&2 "upgrade: upgrade --check failed !"
+        return 1
+    }
+
+    setuidgid "$POSTGRESQL_USER" $pg_dist/bin/pg_upgrade \
+        --old-datadir="$POSTGRESQL_DB_DATA_PREVIOUS" \
+        --new-datadir="$POSTGRESQL_DB_DATA" \
+        --old-bindir="$db_dist/bin" \
+        --new-bindir="$pg_dist/bin" \
+        --old-options '-c config_file=$POSTGRESQL_DB_DATA_PREVIOUS/postgresql.conf' \
+        --new-options '-c config_file=$POSTGRESQL_DB_DATA/postgresql.conf'
+}
+
+
 
 which_db_data
 
 if [ ! -d "$POSTGRESQL_DB_DATA" ]; then
-    postgresql_initdb
+    postgresql_initdb 2>&1
 fi
 
-postgresql_run
+if ! compare_version; then
+    upgrade_db $db_version $pg_version
+fi
+
+postgresql_run 2>&1
