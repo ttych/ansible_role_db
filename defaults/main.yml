@@ -1,5 +1,7 @@
 ---
-want_db: false
+want_db: no
+want_db_service: yes
+
 db_type:
   - postgresql
 

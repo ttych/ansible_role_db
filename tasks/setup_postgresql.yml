@@ -32,6 +32,7 @@
         src: "{{ db_postgresql_svscan_dir }}"
         dest: "{{ daemontools_svscan_dir }}/postgresql"
         state: link
+      when: want_db_service
 
   when: has_daemontools
 
@@ -60,6 +61,9 @@
         name: "{{ item }}"
         state: restarted
       loop: "{{ db_postgresql_services }}"
-      when: t_db_postgresql_conf.changed and not t_db_postgresql_service.changed
+      when:
+        - t_db_postgresql_conf.changed
+        - not t_db_postgresql_service.changed
+        - want_db_service
 
   when: has_daemontools is not defined or not has_daemontools
